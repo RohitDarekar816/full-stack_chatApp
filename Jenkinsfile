@@ -1,5 +1,5 @@
 pipeline {
-  agent any
+  agent { label: 'do-agnet' }
 
   stages {
 
