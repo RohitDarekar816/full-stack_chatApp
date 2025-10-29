@@ -7,16 +7,12 @@ metadata:
     argocd-image-updater.argoproj.io/image-list: frontend=rohitdarekar816/chatapp-frontend
     argocd-image-updater.argoproj.io/frontend.update-strategy: semver
     argocd-image-updater.argoproj.io/write-back-method: argocd
-    argocd-image-updater.argoproj.io/frontend.set-parameter: frontend-tag
 spec:
   project: default
   source:
     repoURL: https://github.com/RohitDarekar816/full-stack_chatApp.git
     targetRevision: main
     path: k8s
-    parameters:
-      - name: frontend-tag
-        value: v1.0.0
     directory:
       include: frontend-*.yaml
   destination:
