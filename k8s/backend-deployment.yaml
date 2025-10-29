@@ -4,7 +4,7 @@ metadata:
   name: backend
   namespace: chat-app
 spec:
-  replicas: 1
+  replicas: 3
   selector:
     matchLabels:
       app: backend
@@ -38,4 +38,3 @@ spec:
             requests:
               memory: "256Mi"
               cpu: "250m"
-

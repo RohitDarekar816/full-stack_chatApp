@@ -4,7 +4,7 @@ metadata:
   name: mongodb
   namespace: chat-app
 spec:
-  replicas: 1
+  replicas: 3
   selector:
     matchLabels:
       app: mongodb
@@ -30,4 +30,3 @@ spec:
         - name: mongo-data
           persistentVolumeClaim:
             claimName: mongo-pvc
-

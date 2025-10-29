@@ -4,7 +4,7 @@ metadata:
   name: frontend
   namespace: chat-app
 spec:
-  replicas: 1
+  replicas: 3
   selector:
     matchLabels:
       app: frontend
@@ -52,4 +52,3 @@ spec:
         - name: nginx-config
           configMap:
             name: nginx-config
-
