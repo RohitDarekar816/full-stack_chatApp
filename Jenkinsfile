@@ -74,6 +74,17 @@ pipeline {
       }
     }
 
+    stage('Push to Docker Hub') {
+      steps {
+        script {
+          sh """
+            docker push rohitdarekar816/chatapp-frontend:latest
+            docker push rohitdarekar816/chatapp-backend:latest
+          """
+        }
+      }
+    }
+
     stage('Scan image') {
       steps {
         script {
@@ -83,17 +94,6 @@ pipeline {
             docker run --rm -v $PWD:/root/scan aquasec/trivy image --severity HIGH,CRITICAL --format json -o /root/scan/${scanreportFile} rohitdarekar816/chatapp-backend:latest
           """
           // archiveArtifacts artifacts: "${scanreportFile}", fingerprint: true
-        }
-      }
-    }
-
-    stage('Push to Docker Hub') {
-      steps {
-        script {
-          sh """
-          docker push rohitdarekar816/chatapp-frontend:latest
-          docker push rohitdarekar816/chatapp-backend:latest
-          """
         }
       }
     }
