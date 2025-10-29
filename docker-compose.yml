@@ -5,12 +5,12 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8082:80"
-    depends_on:
-      - backend
+    #depends_on:
+    #- backend
     networks:
       - chat-network
     environment:
-      - BACKEND_URL=http://backend:5001
+      - BACKEND_URL=http://localhost:5001
     restart: unless-stopped
 
   backend:
