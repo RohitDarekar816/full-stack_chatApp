@@ -1,41 +1,138 @@
 pipeline {
-    agent any
+  agent any
 
-    stages {
-        stage('Checkout') {
-            steps {
-                git branch: 'master',
-                    url: 'https://github.com/iemafzalhassan/full-stack_chatApp.git'
-            }
-        }
+  stages {
 
-        stage('Test') {
-            steps {
-                script {
-                    sh '''
-                        sleep 15
-                        curl -f http://localhost:5001/health
-                        curl -f http://localhost/ || exit 1
-                    '''
-                }
-            }
+    stage('Start Notification') {
+      steps {
+        script {
+          def message = "This chat_app_prod_infra pipeline has been triggerd from jenkins!"
+          def jsonPayload = "{\"text\": \"${message}\"}"
+          sh """
+            curl -X POST \\
+            -H "Content-Type: application/json" \\
+            -d '${jsonPayload}' \\
+            "https://chat.googleapis.com/v1/spaces/AAQAoL3O840/messages?key=AIzaSyDdI0hCZtE6vySjMm-WEfRq3CPzqKqqsHI&token=iqBfBelvIk5ZaQ55RhdOTR0s-IwkOVm_ZCsD23SWsbk"
+          """
         }
-
-        stage('Deploy') {
-            steps {
-                script {
-                    sh 'docker-compose up -d --build'
-                }
-            }
-        }
+      }
     }
 
-    post {
-        success {
-            echo 'Deployment and tests completed successfully!'
+    stage('remove any docker image'){
+      steps {
+        script {
+          sh 'docker image prune -a -f'
         }
-        failure {
-            echo 'Deployment or tests failed.'
+      }
+    }
+
+    stage('filesystem scan') {
+      steps {
+        script {
+          def reportFile = 'trivy-filescan-report.json'
+          def webhookUrl = 'https://chat.googleapis.com/v1/spaces/AAQAoL3O840/messages?key=AIzaSyDdI0hCZtE6vySjMm-WEfRq3CPzqKqqsHI&token=iqBfBelvIk5ZaQ55RhdOTR0s-IwkOVm_ZCsD23SWsbk'
+          def exitcode = sh(
+            script: """
+              trivy fs --scanners vuln,secret,misconfig --exit-code 1 --format json -o ${reportFile} .
+              """,
+            returnStatus: true
+          )
+          // archiveArtifacts artifacts: "${reportFile}", fingerprint: true
+
+          if (exitcode !=0) {
+            echo "Vulnerabilities found in file scan!"
+            def message = """
+            {
+              "text": "⚠️ *Vulnerabilities found in container file scan!*
+                Severity: HIGH/CRITICAL
+                Build: ${env.BUILD_URL}"
+            }
+            """
+            sh """
+              curl -X POST -H 'Content-Type: application/json' \
+              -d '${message.trim()}' \
+              '${webhookUrl}'
+            """
+            // error("Trivy scan failed due to vulnerabilities.")
+            currentBuild.result = 'UNSTABLE'
+          } else {
+            echo "No critical vulnerabilities found."
+          }
+          }
+        }
+      }
+
+    stage('Building Docker Image') {
+      steps {
+        script {
+          sh """
+            docker build -t rohitdarekar816/chatapp-frontend:latest -f ./frontend/Dockerfile ./frontend
+            docker build -t rohitdarekar816/chatapp-backend:latest -f ./backend/Dockerfile ./backend
+          """
+        }
+      }
+    }
+
+    stage('Scan image') {
+      steps {
+        script {
+          def scanreportFile = 'trivy-report.json'
+          sh """
+            docker run --rm -v $PWD:/root/scan aquasec/trivy image --severity HIGH,CRITICAL --format json -o /root/scan/${scanreportFile} rohitdarekar816/chatapp-frontend:latest
+            docker run --rm -v $PWD:/root/scan aquasec/trivy image --severity HIGH,CRITICAL --format json -o /root/scan/${scanreportFile} rohitdarekar816/chatapp-backend:latest
+          """
+          // archiveArtifacts artifacts: "${scanreportFile}", fingerprint: true
+        }
+      }
+    }
+
+    stage('Push to Docker Hub') {
+      steps {
+        script {
+          sh """
+          docker push rohitdarekar816/chatapp-frontend:latest
+          docker push rohitdarekar816/chatapp-backend:latest
+          """
+        }
+      }
+    }
+
+    stage('Clean docker images') {
+      steps {
+        script {
+          sh 'docker image prune -a -f'
+        }
+      }
+    }
+  }
+
+  post {
+    success {
+        script {
+            def message = "This chat_app_prod_infrap pipeline is success! at jenkins pipeline and docker image has been pushed! wihh tag: latest"
+            def jsonPayload = """{"text": "${message}"}"""
+            sh """
+                curl -X POST \\
+                -H "Content-Type: application/json" \\
+                -d '${jsonPayload}' \\
+                "https://chat.googleapis.com/v1/spaces/AAQAoL3O840/messages?key=AIzaSyDdI0hCZtE6vySjMm-WEfRq3CPzqKqqsHI&token=iqBfBelvIk5ZaQ55RhdOTR0s-IwkOVm_ZCsD23SWsbk"
+            """
         }
     }
+    unstable {
+        script {
+            def message = "This prod_infra pipeline is unstable but docker image has been pushed!"
+            def jsonPayload = """{"text": "${message}"}"""
+            sh """
+                curl -X POST \\
+                -H "Content-Type: application/json" \\
+                -d '${jsonPayload}' \\
+                "https://chat.googleapis.com/v1/spaces/AAQAoL3O840/messages?key=AIzaSyDdI0hCZtE6vySjMm-WEfRq3CPzqKqqsHI&token=iqBfBelvIk5ZaQ55RhdOTR0s-IwkOVm_ZCsD23SWsbk"
+            """
+        }
+    }
+    always {
+        echo 'This message always runs, regardless of success or failure.'
+    }
+}
 }
