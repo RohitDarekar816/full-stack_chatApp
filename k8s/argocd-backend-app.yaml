@@ -7,12 +7,16 @@ metadata:
     argocd-image-updater.argoproj.io/image-list: backend=rohitdarekar816/chatapp-backend
     argocd-image-updater.argoproj.io/backend.update-strategy: semver
     argocd-image-updater.argoproj.io/write-back-method: argocd
+    argocd-image-updater.argoproj.io/backend.set-parameter: backend-tag
 spec:
   project: default
   source:
     repoURL: https://github.com/RohitDarekar816/full-stack_chatApp.git
     targetRevision: main
     path: k8s
+    parameters:
+      - name: backend-tag
+        value: v1.0.0
     directory:
       include: backend-*.yaml
   destination:
