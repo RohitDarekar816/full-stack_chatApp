@@ -97,14 +97,10 @@ docker --version
 With the prerequisites set up, let’s grab the code for the chat application. Run the following commands:
 
 ```bash
-git clone https://github.com/iemafzalhassan/full-stack_chatApp.git
+git clone https://github.com/RohitDarekar816/full-stack_chatApp.git
 ```
 ```bash
 cd full-stack_chatApp/k8s
-```
-
-```bash
-git checkout DevOps
 ```
 
 This will:
@@ -262,6 +258,44 @@ This command:
 Once the services are running, you can access the app at [http://localhost:8080](http://localhost:8080).
 
 
+## 🚀 ArgoCD Deployment with Image Updater
+
+For a GitOps-based deployment with automatic image updates, use ArgoCD.
+
+### Prerequisites
+- ArgoCD CLI installed (optional, for UI access)
+- Kubernetes cluster running
+
+### Install ArgoCD
+```bash
+kubectl create namespace argocd
+kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+```
+
+### Install ArgoCD Image Updater
+```bash
+kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj-labs/argocd-image-updater/stable/manifests/install.yaml
+```
+
+### Deploy Applications
+```bash
+kubectl apply -f argocd-base-app.yaml
+kubectl apply -f argocd-backend-app.yaml
+kubectl apply -f argocd-frontend-app.yaml
+kubectl apply -f argocd-mongodb-app.yaml
+```
+
+### Access ArgoCD UI
+```bash
+kubectl port-forward svc/argocd-server -n argocd 8080:443
+```
+Open https://localhost:8080, login with admin and password from:
+```bash
+kubectl get secret argocd-initial-admin-secret -n argocd -o jsonpath="{.data.password}" | base64 -d
+```
+
+The ArgoCD Image Updater will automatically update the container images to the latest versions when new tags are available.
+
 ## 🎉 Conclusion
 
-Congratulations! You’ve successfully deployed the **Full-Stack Chat Application** using **Kubernetes (via Kind)** or **Docker Compose**. Whether you're using Kubernetes for a more robust, scalable solution or Docker Compose for a simpler local setup, your chat app is now running!
+Congratulations! You’ve successfully deployed the **Full-Stack Chat Application** using **Kubernetes (via Kind)**, **Docker Compose**, or **ArgoCD with Image Updater**. Choose the method that best fits your needs!
