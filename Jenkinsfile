@@ -1,5 +1,6 @@
 pipeline {
-  agent { label: 'do-agent' }
+  // Use the declarative "label" form without a map (colon) so older Jenkins parsers accept it
+  agent { label 'do-agent' }
 
   stages {
 
@@ -131,8 +132,8 @@ pipeline {
             """
         }
     }
-    always {
-        echo 'This message always runs, regardless of success or failure.'
-    }
-}
+  always {
+    echo 'This message always runs, regardless of success or failure.'
+  }
+  }
 }
