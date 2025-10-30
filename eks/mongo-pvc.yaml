@@ -5,7 +5,7 @@ metadata:
   namespace: chat-app
 spec:
   accessModes:
-    - ReadWriteOnces
+    - ReadWriteOnce
   storageClassName: ""
   resources:
     requests:
