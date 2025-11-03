@@ -19,14 +19,13 @@ metadata:
   name: mongodb-metrics
   namespace: chat-app
   labels:
-    app: mongodb
+    app: mongodb-exporter
 spec:
   selector:
-    app: mongodb
+    app: mongodb-exporter
   ports:
     - name: metrics
       protocol: TCP
       port: 9216
       targetPort: 9216
   type: ClusterIP
-
