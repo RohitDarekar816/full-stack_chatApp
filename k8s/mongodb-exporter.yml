@@ -20,4 +20,4 @@ spec:
             - containerPort: 9216
           env:
             - name: MONGODB_URI
-              value: "mongodb://root:admin@localhost:27017/admin"
+              value: "mongodb://root:admin@mongodb:27017/chatApp?authSource=admin"
