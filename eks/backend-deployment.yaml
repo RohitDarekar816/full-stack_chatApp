@@ -4,7 +4,7 @@ metadata:
   name: backend
   namespace: chat-app
 spec:
-  replicas: 3
+  replicas: 1
   selector:
     matchLabels:
       app: backend
@@ -21,7 +21,7 @@ spec:
             - containerPort: 5001
           env:
             - name: MONGODB_URI
-              value: "mongodb://root:admin@mongodb:27017/chatApp?authSource=admin"
+              value: "mongodb+srv://myAtlasDBUser:Rohit@2023#@github-webhook.p0pdz5y.mongodb.net/?appName=Github-Webhook"
             - name: PORT
               value: "5001"
             - name: NODE_ENV
