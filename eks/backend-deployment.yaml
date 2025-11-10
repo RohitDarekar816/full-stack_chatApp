@@ -21,7 +21,7 @@ spec:
             - containerPort: 5001
           env:
             - name: MONGODB_URI
-              value: "mongodb+srv://myAtlasDBUser:Rohit@2023#@github-webhook.p0pdz5y.mongodb.net/?appName=Github-Webhook"
+              value: "mongodb+srv://myAtlasDBUser:AKIA54VZMQ6R4RKYHPQL@github-webhook.p0pdz5y.mongodb.net/?appName=Github-Webhook"
             - name: PORT
               value: "5001"
             - name: NODE_ENV
